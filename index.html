@@ -1,1 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Roqqu App</title>
+  <script src="https://unpkg.com/htm@3.1.1"></script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/lucide-react@0.263.1/dist/lucide-react.umd.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .animate-marquee { display: flex; width: 200%; animation: marquee 30s linear infinite; }
+    .roqqu-white-top { border-top-left-radius: 2.5rem; border-top-right-radius: 2.5rem; background-color: #0a0a0c; position: relative; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    body { background-color: #050505; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .action-circle {
+      width: 68px;
+      height: 68px;
+      background-color: #1c1c1e;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
 
+  <script type="module">
+    const { useState, useEffect } = React;
+    const {
+      Home, Wallet, LayoutGrid, CreditCard, Clock,
+      Search, Headphones, ChevronDown, Eye, EyeOff,
+      ArrowUpRight, ArrowDownLeft, RefreshCw,
+      Menu, X, SlidersHorizontal, AlertCircle, Loader2,
+      ChevronRight, Banknote, ShieldCheck, Timer,
+      ArrowRight, Plus, Minus, Settings, Info, TrendingUp
+    } = window.LucideReact;
+
+    // --- MOCK DATA ---
+    const cryptos = [
+      { id: 1, name: 'Bitcoin', symbol: 'BTC', price: '111,150,490', change: '+0.57%', up: true, icon: '₿', color: 'text-orange-500' },
+      { id: 2, name: 'Ethereum', symbol: 'ETH', price: '4,200,500', change: '+1.2%', up: true, icon: 'Ξ', color: 'text-purple-400' },
+      { id: 3, name: 'Solana', symbol: 'SOL', price: '210,400', change: '-2.1%', up: false, icon: '◎', color: 'text-emerald-400' },
+      { id: 4, name: 'Cardano', symbol: 'ADA', price: '650.20', change: '+0.4%', up: true, icon: '₳', color: 'text-blue-600' },
+      { id: 5, name: 'Dogecoin', symbol: 'DOGE', price: '215.40', change: '+4.2%', up: true, icon: 'Ð', color: 'text-yellow-600' },
+      { id: 6, name: 'PAX Gold', symbol: 'PAXG', price: '6,474,586.25', change: '+0.07%', up: true, icon: '●', color: 'text-yellow-500' },
+      { id: 7, name: 'Paris-Saint Germain', symbol: 'PSG', price: '1,634.875', change: '+28.95%', up: true, icon: '⚽', color: 'text-blue-500' },
+      { id: 8, name: 'Uniswap', symbol: 'UNI', price: '5,509.625', change: '+9.42%', up: true, icon: '🦄', color: 'text-pink-500' },
+      { id: 9, name: 'Sui', symbol: 'SUI', price: '1,547.425', change: '+6.08%', up: true, icon: '💧', color: 'text-cyan-400' },
+      { id: 10, name: 'Polkadot', symbol: 'DOT', price: '10,200', change: '-1.5%', up: false, icon: '●', color: 'text-pink-600' },
+    ];
+
+    const stocks = [
+      { id: 1, name: 'Apple Inc.', symbol: 'AAPL', price: '$189.50', change: '+1.2%', up: true },
+      { id: 2, name: 'Tesla Inc.', symbol: 'TSLA', price: '$175.20', change: '-3.4%', up: false },
+      { id: 3, name: 'Microsoft Corp.', symbol: 'MSFT', price: '$410.00', change: '+0.8%', up: true },
+      { id: 4, name: 'Amazon.com', symbol: 'AMZN', price: '$185.40', change: '+1.5%', up: true },
+      { id: 5, name: 'Alphabet Inc.', symbol: 'GOOGL', price: '$168.30', change: '-0.2%', up: false },
+      { id: 6, name: 'Meta Platforms', symbol: 'META', price: '$480.10', change: '+2.1%', up: true },
+      { id: 7, name: 'NVIDIA Corp.', symbol: 'NVDA', price: '$890.50', change: '+4.5%', up: true },
+      { id: 8, name: 'Netflix Inc.', symbol: 'NFLX', price: '$610.20', change: '-1.0%', up: false },
+      { id: 9, name: 'Alibaba Group', symbol: 'BABA', price: '$78.40', change: '-0.5%', up: false },
+      { id: 10, name: 'AMD', symbol: 'AMD', price: '$155.80', change: '+1.9%', up: true },
+    ];
+
+    const historyData = [
+      { id: 1, type: 'BTC Received', sub: 'Pending confirmation', amount: '340.00', btc: '0.000620', date: 'Sunday, May 10, 2026', status: 'pending', color: 'text-emerald-400' },
+      { id: 2, type: 'BTC Sent', sub: 'External Wallet', amount: '150.00', btc: '0.000280', date: 'Friday, May 8, 2026', status: 'completed', color: 'text-rose-500' },
+      { id: 3, type: 'Withdraw Made', sub: 'Bank Transfer', amount: '520.00', btc: '₦64,841', date: 'Saturday, May 2, 2026', status: 'completed', color: 'text-rose-500' },
+      { id: 4, type: 'BTC Received', sub: 'Transfer from User', amount: '890.00', btc: '0.001640', date: 'Saturday, May 2, 2026', status: 'completed', color: 'text-emerald-400' },
+      { id: 5, type: 'BTC Sent', sub: 'Payment for service', amount: '45.00', btc: '0.000082', date: 'Saturday, May 2, 2026', status: 'completed', color: 'text-rose-500' },
+      { id: 6, type: 'BTC Received', sub: 'External Transfer', amount: '730.00', btc: '0.001350', date: 'Wednesday, Apr 29, 2026', status: 'completed', color: 'text-emerald-400' },
+      { id: 7, type: 'Withdraw Made', sub: 'Opay Withdrawal', amount: '210.00', btc: '₦26,145', date: 'Wednesday, Apr 29, 2026', status: 'completed', color: 'text-rose-500' },
+      { id: 8, type: 'BTC Sent', sub: 'Exchange Transfer', amount: '80.00', btc: '0.000140', date: 'Wednesday, Apr 29, 2026', status: 'completed', color: 'text-rose-500' },
+      { id: 9, type: 'BTC Received', sub: 'P2P Purchase', amount: '440.00', btc: '0.000810', date: 'Wednesday, Apr 29, 2026', status: 'completed', color: 'text-emerald-400' },
+      { id: 10, type: 'Withdraw Made', sub: 'Bank Account', amount: '600.00', btc: '₦74,520', date: 'Wednesday, Apr 29, 2026', status: 'completed', color: 'text-rose-500' },
+      { id: 11, type: 'BTC Sent', sub: 'Payment', amount: '120.00', btc: '0.000220', date: 'Wednesday, Apr 29, 2026', status: 'completed', color: 'text-rose-500' },
+      { id: 12, type: 'BTC Received', sub: 'Transfer', amount: '310.00', btc: '0.000570', date: 'Tuesday, Mar 10, 2026', status: 'completed', color: 'text-emerald-400' },
+      { id: 13, type: 'BTC Sent', sub: 'Gift', amount: '75.00', btc: '0.000130', date: 'Tuesday, Mar 10, 2026', status: 'completed', color: 'text-rose-500' },
+      { id: 14, type: 'Withdraw Made', sub: 'Direct Bank', amount: '850.00', btc: '₦105,420', date: 'Monday, Feb 24, 2026', status: 'completed', color: 'text-rose-500' },
+      { id: 15, type: 'BTC Received', sub: 'Mining Reward', amount: '290.00', btc: '0.000530', date: 'Monday, Feb 24, 2026', status: 'completed', color: 'text-emerald-400' },
+      { id: 16, type: 'BTC Sent', sub: 'Private Wallet', amount: '330.00', btc: '0.000610', date: 'Monday, Feb 24, 2026', status: 'completed', color: 'text-rose-500' },
+      { id: 17, type: 'Withdraw Made', sub: 'ATM Withdrawal', amount: '150.00', btc: '₦18,600', date: 'Monday, Feb 24, 2026', status: 'completed', color: 'text-rose-500' },
+      { id: 18, type: 'BTC Received', sub: 'Payment', amount: '780.00', btc: '0.001440', date: 'Wednesday, Jan 28, 2026', status: 'completed', color: 'text-emerald-400' },
+      { id: 19, type: 'BTC Sent', sub: 'Fee Payment', amount: '220.00', btc: '0.000405', date: 'Wednesday, Jan 28, 2026', status: 'completed', color: 'text-rose-500' },
+      { id: 20, type: 'Withdraw Made', sub: 'Opay App', amount: '410.00', btc: '₦50,840', date: 'Monday, Jan 5, 2026', status: 'completed', color: 'text-rose-500' },
+    ];
+
+    // --- COMPONENTS ---
+    const NavItem = ({ icon, label, active, onClick, dot }) => html`
+      <button onClick=${onClick} className=${`flex flex-col items-center gap-1 transition-all ${active ? 'text-white' : 'text-gray-500'}`}>
+        <div className="relative">
+          ${icon}
+          ${dot && html`<div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-orange-500 rounded-full border-2 border-[#0a0a0c]"></div>`}
+        </div>
+        <span className="text-[10px] font-bold">${label}</span>
+      </button>
+    `;
+
+    const HomeAction = ({ icon, label, onClick }) => html`
+      <div onClick=${onClick} className="flex flex-col items-center gap-2 cursor-pointer active:scale-95 transition-transform">
+        <div className="action-circle">${icon}</div>
+        <span className="text-xs font-medium text-gray-400">${label}</span>
+      </div>
+    `;
+
+    const HomeView = ({ balanceValue, showBalance, setShowBalance, onWithdraw, onSeeMore }) => html`
+      <div className="space-y-8 px-4 pb-8 animate-in fade-in duration-500">
+        <!-- Balance -->
+        <div className="pt-6 text-center">
+          <div className="flex items-center justify-center gap-3 mb-1">
+            <span className="text-4xl font-black tracking-widest text-gray-400">
+              ${showBalance ? `₦${balanceValue}` : '***********'}
+            </span>
+            <button onClick=${() => setShowBalance(!showBalance)} className="text-gray-400">
+              ${showBalance ? html`<${EyeOff} size=${24} />` : html`<${Eye} size=${24} />`}
+            </button>
+          </div>
+          <div className="inline-flex items-center gap-2 bg-[#1c1c1e] px-5 py-1.5 rounded-3xl border border-white/5">
+            <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center text-xs">🇳🇬</div>
+            <span className="font-medium text-sm">NGN</span>
+            <${ChevronDown} size=${16} className="text-gray-500" />
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div className="bg-[#121214] rounded-3xl p-6">
+          <div className="grid grid-cols-4 gap-6">
+            <${HomeAction} icon=${html`<${ArrowDownLeft} size=${28} className="text-[#268aff]" />`} label="Deposit" />
+            <${HomeAction} icon=${html`<${ArrowUpRight} size=${28} className="text-[#268aff]" />`} label="Withdraw" onClick=${onWithdraw} />
+            <${HomeAction} icon=${html`<${RefreshCw} size=${28} className="text-[#268aff]" />`} label="Buy" />
+            <${HomeAction} icon=${html`<${RefreshCw} size=${28} className="text-[#268aff]" />`} label="Sell" />
+          </div>
+          <div className="flex justify-center mt-6">
+            <button onClick=${onSeeMore} className="text-[#268aff] text-sm font-semibold">See more</button>
+          </div>
+        </div>
+
+        <!-- Futures Trading -->
+        <div className="bg-[#121214] rounded-3xl p-6 relative overflow-hidden">
+          <div className="flex justify-between items-start">
+            <div className="max-w-[58%]">
+              <h3 className="text-2xl font-bold leading-tight">Futures trading,<br>for the rest of us</h3>
+              <p className="text-gray-400 text-sm mt-2">Take positions on your favorite coins without the noise</p>
+              <button className="mt-5 bg-white text-black px-6 py-3 rounded-2xl font-semibold text-sm">Start trading</button>
+            </div>
+            <div className="w-40 h-40 -mt-6 -mr-6">
+              <img src="https://picsum.photos/id/1015/300/300" class="w-full h-full object-contain" alt="futures" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Take the Quiz -->
+        <div className="bg-[#121214] rounded-3xl p-6 flex items-center justify-between">
+          <div>
+            <h4 className="font-semibold text-lg">Take the Quiz</h4>
+            <p className="text-gray-400 text-sm mt-1">Learn how to spot scams & protect your funds!</p>
+          </div>
+          <button className="bg-[#268aff] px-6 py-3 rounded-2xl font-semibold text-sm whitespace-nowrap">Take the Quiz</button>
+        </div>
+
+        <!-- Featured Coins -->
+        <div>
+          <div className="flex justify-between items-center mb-4 px-1">
+            <h3 className="font-bold text-xl">Our 128+ Featured Coins</h3>
+            <span className="text-[#268aff] text-sm font-medium">See all</span>
+          </div>
+          <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-4">
+            ${cryptos.slice(0, 4).map(coin => html`
+              <div className="min-w-[210px] bg-[#1c1c1e] rounded-3xl p-5 border border-white/5">
+                <div className="flex items-center gap-3">
+                  <div className=${`text-4xl ${coin.color}`}>${coin.icon}</div>
+                  <div>
+                    <p className="font-bold">${coin.symbol}</p>
+                    <p className="text-xs text-gray-500">${coin.name}</p>
+                  </div>
+                </div>
+                <div className="mt-6 h-20 bg-gradient-to-r from-transparent via-white/10 to-transparent rounded-2xl flex items-end justify-center text-xs text-emerald-400">
+                  ▲ Chart
+                </div>
+                <div className="mt-4">
+                  <p className="font-bold text-xl">₦${coin.price}</p>
+                  <p className=${`text-sm font-medium ${coin.up ? 'text-emerald-500' : 'text-rose-500'}`}>${coin.change}</p>
+                </div>
+              </div>
+            `)}
+          </div>
+        </div>
+
+        <!-- Explore Market -->
+        <div>
+          <h3 className="font-bold text-xl px-1 mb-3">Explore the market</h3>
+          <div className="bg-[#121214] rounded-3xl p-1">
+            ${cryptos.slice(6, 9).map(coin => html`
+              <div className="flex items-center justify-between p-5 border-b border-white/5 last:border-none">
+                <div className="flex items-center gap-4">
+                  <div className="w-11 h-11 bg-[#1c1c1e] rounded-2xl flex items-center justify-center text-3xl">${coin.icon}</div>
+                  <div>
+                    <p className="font-semibold">${coin.name}</p>
+                    <p className="text-xs text-gray-500">${coin.symbol}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold">₦${coin.price}</p>
+                  <p className=${`text-sm font-medium ${coin.up ? 'text-emerald-500' : 'text-rose-500'}`}>${coin.change}</p>
+                </div>
+              </div>
+            `)}
+          </div>
+        </div>
+
+        <!-- Stay Updated -->
+        <div className="bg-[#121214] rounded-3xl p-6">
+          <div className="flex justify-between text-sm mb-4">
+            <span className="font-medium">Stay Updated</span>
+            <span className="text-[#268aff]">See all</span>
+          </div>
+          <div className="flex items-center gap-3 bg-[#1c1c1e] rounded-2xl p-4">
+            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-xl">𝕏</div>
+            <div className="flex-1">
+              <p className="font-medium text-sm">Stay Ahead with Roqqu on X!</p>
+            </div>
+            <div className="text-xs bg-white/10 px-3 py-1 rounded-xl">1/4</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const WalletView = () => html`
+      <div className="p-4 space-y-6 animate-in slide-in-from-right duration-500">
+        <div className="bg-gradient-to-br from-[#1c1c1e] to-[#050505] p-8 rounded-[3rem] text-center border border-white/10 space-y-4">
+          <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">Total Assets</p>
+          <h2 className="text-4xl font-black">₿ 0.04285</h2>
+          <p className="text-emerald-500 font-bold">≈ ₦5,420,800.00</p>
+        </div>
+        <div className="space-y-4">
+          <h3 className="font-bold text-lg px-2">Holdings (10)</h3>
+          <div className="space-y-3">
+            ${cryptos.map(coin => html`
+              <div key=${coin.id} className="bg-[#121214] p-5 rounded-3xl flex justify-between items-center border border-white/5">
+                <div className="flex items-center gap-4">
+                  <div className=${`w-12 h-12 rounded-2xl bg-black flex items-center justify-center text-2xl ${coin.color}`}>${coin.icon}</div>
+                  <div><p className="font-bold">${coin.name}</p><p className="text-xs text-gray-500 uppercase font-bold">${coin.symbol}</p></div>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold">0.000${coin.id}42</p>
+                  <p className="text-xs text-gray-500">₦${coin.price}</p>
+                </div>
+              </div>
+            `)}
+          </div>
+        </div>
+      </div>
+    `;
+
+    const MarketView = () => {
+      const [tab, setTab] = useState('crypto');
+      return html`
+        <div className="space-y-6 animate-in slide-in-from-right duration-500">
+          <div className="bg-[#121214] py-3 overflow-hidden border-y border-white/5">
+            <div className="animate-marquee gap-8">
+              ${[...stocks, ...stocks].map((s, i) => html`
+                <div key=${i} className="flex items-center gap-2 whitespace-nowrap px-4">
+                  <span className="text-xs font-black text-gray-400">${s.symbol}</span>
+                  <span className="text-xs font-bold">${s.price}</span>
+                  <span className=${`text-[10px] font-bold ${s.up ? 'text-emerald-500' : 'text-rose-500'}`}>${s.change}</span>
+                </div>
+              `)}
+            </div>
+          </div>
+          <div className="flex gap-4 px-4">
+            <button onClick=${() => setTab('crypto')} className=${`px-6 py-2 rounded-full text-xs font-bold uppercase ${tab === 'crypto' ? 'bg-[#268aff]' : 'bg-[#1c1c1e] text-gray-500'}`}>Cryptos</button>
+            <button onClick=${() => setTab('stock')} className=${`px-6 py-2 rounded-full text-xs font-bold uppercase ${tab === 'stock' ? 'bg-[#268aff]' : 'bg-[#1c1c1e] text-gray-500'}`}>Stocks</button>
+          </div>
+          <div className="px-4 space-y-3">
+            ${(tab === 'crypto' ? cryptos : stocks).map(item => html`
+              <div key=${item.id} className="bg-[#121214] p-5 rounded-3xl flex justify-between items-center border border-white/5">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-black flex items-center justify-center font-bold">${item.icon || item.symbol[0]}</div>
+                  <div><p className="font-bold text-sm">${item.name}</p><p className="text-xs text-gray-500 font-bold uppercase">${item.symbol}</p></div>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-sm">${tab === 'crypto' ? '₦' + item.price : item.price}</p>
+                  <p className=${`text-xs font-bold ${item.up ? 'text-emerald-500' : 'text-rose-500'}`}>${item.change}</p>
+                </div>
+              </div>
+            `)}
+          </div>
+        </div>
+      `;
+    };
+
+    const CardView = () => html`
+      <div className="p-6 space-y-8 animate-in fade-in duration-500">
+        <h2 className="text-3xl font-black">Roqqu Cards</h2>
+        <div className="w-full h-56 rounded-[2.5rem] bg-gradient-to-br from-[#268aff] via-blue-800 to-black p-8 relative overflow-hidden shadow-2xl">
+           <div className="absolute top-0 right-0 p-8 opacity-20"><${CreditCard} size=${100}/></div>
+           <div className="h-full flex flex-col justify-between relative z-10">
+              <div className="flex justify-between items-start">
+                 <div className="flex items-center gap-2 font-black italic text-xl">ROQQU</div>
+                 <div className="w-12 h-8 bg-yellow-500/20 rounded-md border border-yellow-500/50"></div>
+              </div>
+              <div className="text-2xl font-mono tracking-widest text-white/90">5342 •••• •••• 2026</div>
+              <div className="flex justify-between items-end">
+                 <div><p className="text-[10px] uppercase font-bold text-white/50">Card Holder</p><p className="font-bold uppercase">John Doe</p></div>
+                 <div className="w-12 h-8 rounded bg-white/10 border border-white/20"></div>
+              </div>
+           </div>
+        </div>
+        <div className="bg-[#121214] p-6 rounded-3xl space-y-6">
+           <div className="flex justify-between"><span className="text-gray-500 font-bold">Status</span><span className="text-emerald-500 font-bold">Active</span></div>
+           <div className="flex justify-between"><span className="text-gray-500 font-bold">Limit</span><span className="font-bold">$2,500.00</span></div>
+           <button className="w-full bg-[#1c1c1e] py-4 rounded-2xl font-bold border border-white/5">Card Settings</button>
+        </div>
+      </div>
+    `;
+
+    const HistoryView = () => html`
+      <div className="p-4 space-y-8 animate-in slide-in-from-bottom duration-500">
+        <div className="flex gap-2">
+          <div className="flex-1 bg-[#121214] p-4 rounded-2xl flex items-center gap-3 border border-white/5">
+            <${Search} size=${18} className="text-gray-500" /><input placeholder="Search BTC transactions" className="bg-transparent border-none outline-none text-sm w-full" />
+          </div>
+          <button className="bg-[#121214] p-4 rounded-2xl border border-white/5"><${SlidersHorizontal} size=${18} /></button>
+        </div>
+
+        ${[
+          { date: 'Sunday, May 10, 2026', items: [historyData[0]] },
+          { date: 'Friday, May 8, 2026', items: [historyData[1]] },
+          { date: 'Saturday, May 2, 2026', items: historyData.slice(2, 5) },
+          { date: 'Wednesday, Apr 29, 2026', items: historyData.slice(5, 11) },
+          { date: 'Tuesday, Mar 10, 2026', items: historyData.slice(11, 13) },
+          { date: 'Monday, Feb 24, 2026', items: historyData.slice(13, 17) },
+          { date: 'Wednesday, Jan 28, 2026', items: historyData.slice(17, 19) },
+          { date: 'Monday, Jan 5, 2026', items: [historyData[19]] }
+        ].map((group, idx) => html`
+          <div key=${idx} className="space-y-3">
+            <div className="flex justify-between px-2">
+               <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">${group.date}</span>
+               <span className="text-[10px] font-bold text-gray-600 uppercase">${group.items.length} TX</span>
+            </div>
+            ${group.items.map(tx => html`
+              <div key=${tx.id} className="bg-[#121214] p-5 rounded-[2rem] flex justify-between items-center border border-white/5 active:scale-[0.98] transition-transform">
+                 <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-[#050505] flex items-center justify-center text-2xl text-orange-500 relative">
+                      ₿
+                      <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#1c1c1e] rounded-full border border-white/10 flex items-center justify-center">
+                        ${tx.type.includes('Received') ? html`<${ArrowDownLeft} size=${10} className="text-emerald-500" />` : html`<${ArrowUpRight} size=${10} className="text-rose-500" />`}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-gray-200">${tx.type}</h4>
+                      <p className="text-[11px] text-gray-500 font-medium truncate w-32">${tx.sub}</p>
+                    </div>
+                 </div>
+                 <div className="text-right">
+                    <p className=${`font-black text-sm tracking-tight ${tx.color}`}>
+                      ${tx.status === 'pending' ? '+$340.00' : (tx.type.includes('Received') ? '+' : '-') + '$' + tx.amount}
+                    </p>
+                    <div className="flex items-center justify-end gap-1 mt-1">
+                      ${tx.status === 'pending' ? html`
+                        <span className="text-[10px] text-orange-500 font-black uppercase flex items-center gap-1"><${Timer} size=${10}/> Pending</span>
+                      ` : html`
+                        <span className="text-[10px] text-gray-600 font-bold uppercase">Completed</span>
+                      `}
+                    </div>
+                 </div>
+              </div>
+            `)}
+          </div>
+        `)}
+      </div>
+    `;
+
+    // --- MAIN APP ---
+    const App = () => {
+      const [activeTab, setActiveTab] = useState('home');
+      const [showBalance, setShowBalance] = useState(false);
+      const [showWithdrawFlow, setShowWithdrawFlow] = useState(false);
+      const [showSeeMore, setShowSeeMore] = useState(false);
+      const [withdrawAmount, setWithdrawAmount] = useState('');
+      const [isWithdrawing, setIsWithdrawing] = useState(false);
+      const [withdrawError, setWithdrawError] = useState(false);
+      const balanceValue = "354,450.00";
+
+      const handleWithdraw = () => {
+        if (!withdrawAmount) return;
+        setIsWithdrawing(true);
+        setTimeout(() => {
+          setIsWithdrawing(false);
+          setWithdrawError(true);
+        }, 2000);
+      };
+
+      return html`
+        <div className="bg-[#050505] min-h-screen text-white font-sans overflow-hidden">
+          {/* HEADER */}
+          <div className="fixed top-0 w-full max-w-md mx-auto left-0 right-0 z-[60] bg-[#050505] px-5 py-4 flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-[#1c1c1e] flex items-center justify-center relative">
+                <${Menu} size=${20} className="text-gray-300" />
+                <div className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full border border-[#050505]"></div>
+              </div>
+              <div className="bg-[#1c1c1e] px-4 py-2 rounded-full flex items-center gap-2 border border-white/[0.05]">
+                <span className="text-sm font-medium">Crypto</span>
+                <${ChevronDown} size=${14} className="text-gray-500" />
+              </div>
+            </div>
+            <div className="flex items-center gap-5">
+              <${Search} size=${22} className="text-gray-300" />
+              <${Headphones} size=${22} className="text-gray-300" />
+            </div>
+          </div>
+
+          {/* CONTENT SCROLL AREA */}
+          <main className="max-w-md mx-auto pt-20 pb-28 h-screen overflow-y-auto hide-scrollbar">
+            ${activeTab === 'home' && html`<${HomeView} balanceValue=${balanceValue} showBalance=${showBalance} setShowBalance=${setShowBalance} onWithdraw=${() => setShowWithdrawFlow(true)} onSeeMore=${() => setShowSeeMore(true)} />`}
+            ${activeTab === 'wallet' && html`<${WalletView} />`}
+            ${activeTab === 'market' && html`<${MarketView} />`}
+            ${activeTab === 'card' && html`<${CardView} />`}
+            ${activeTab === 'history' && html`<${HistoryView} />`}
+          </main>
+
+          {/* NAVIGATION */}
+          <nav className="fixed bottom-0 w-full max-w-md mx-auto left-0 right-0 bg-[#0a0a0c] border-t border-white/[0.05] z-[70] rounded-t-[2.5rem]">
+            <div className="flex justify-around items-center py-4 px-2">
+              <${NavItem} icon=${html`<${Home} size=${24} />`} label="Home" active=${activeTab === 'home'} onClick=${() => setActiveTab('home')} dot />
+              <${NavItem} icon=${html`<${Wallet} size=${24} />`} label="Wallet" active=${activeTab === 'wallet'} onClick=${() => setActiveTab('wallet')} />
+              <${NavItem} icon=${html`<${LayoutGrid} size=${24} />`} label="Markets" active=${activeTab === 'market'} onClick=${() => setActiveTab('market')} />
+              <${NavItem} icon=${html`<${CreditCard} size=${24} />`} label="Cards" active=${activeTab === 'card'} onClick=${() => setActiveTab('card')} />
+              <${NavItem} icon=${html`<${Clock} size=${24} />`} label="History" active=${activeTab === 'history'} onClick=${() => setActiveTab('history')} />
+            </div>
+          </nav>
+
+          {/* WITHDRAW FLOW */}
+          ${showWithdrawFlow && html`
+            <div className="fixed inset-0 z-[100] bg-[#050505] flex flex-col max-w-md mx-auto animate-in slide-in-from-right duration-300">
+              <div className="p-6 flex items-center justify-between">
+                <button onClick=${() => setShowWithdrawFlow(false)} className="bg-[#1c1c1e] p-2 rounded-full"><${X} size=${20}/></button>
+                <h2 className="font-bold text-lg">Withdraw NGN</h2>
+                <div className="w-10"></div>
+              </div>
+              <div className="p-6 flex-1 flex flex-col">
+                <div className="space-y-4">
+                  <label className="text-gray-500 text-xs font-bold uppercase tracking-widest">Amount to Withdraw</label>
+                  <div className="flex items-end gap-2 border-b border-white/10 pb-4">
+                    <input
+                      type="number"
+                      autoFocus
+                      value=${withdrawAmount}
+                      onChange=${(e) => setWithdrawAmount(e.target.value)}
+                      placeholder="0.00"
+                      className="bg-transparent text-5xl font-bold w-full outline-none"
+                    />
+                    <span className="text-2xl font-bold text-gray-500 mb-1">NGN</span>
+                  </div>
+                  <p className="text-gray-500 text-xs font-bold">Balance: ₦${balanceValue}</p>
+                </div>
+
+                <div className="mt-10 space-y-4">
+                   <label className="text-gray-500 text-xs font-bold uppercase tracking-widest">Select Destination</label>
+                   <div className="bg-[#121214] p-5 rounded-3xl border border-white/5 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-600/10 flex items-center justify-center text-emerald-500"><${Banknote} /></div>
+                        <div><p className="font-bold">Opay Service</p><p className="text-xs text-gray-500">8104219585</p></div>
+                      </div>
+                      <${ChevronRight} size=${20} className="text-gray-600" />
+                   </div>
+                </div>
+
+                <button
+                  onClick=${handleWithdraw}
+                  disabled=${!withdrawAmount || isWithdrawing}
+                  className="mt-auto w-full bg-[#268aff] h-16 rounded-3xl font-bold text-lg flex items-center justify-center gap-3 active:scale-95 transition-transform"
+                >
+                  ${isWithdrawing ? html`<${Loader2} className="animate-spin" />` : "Proceed Withdrawal"}
+                </button>
+              </div>
+
+              ${withdrawError && html`
+                <div className="absolute inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-8 z-[110]">
+                  <div className="bg-[#121214] p-8 rounded-[2.5rem] w-full text-center space-y-6 border border-rose-500/20">
+                    <div className="w-20 h-20 bg-rose-500/20 rounded-full flex items-center justify-center mx-auto text-rose-500"><${AlertCircle} size=${40}/></div>
+                    <h3 className="text-xl font-bold">Maintenance Notice</h3>
+                    <p className="text-gray-400 text-sm leading-relaxed">Withdrawal is currently unavailable due to maintenance, kindly contact support or try again later.</p>
+                    <button onClick=${() => {setWithdrawError(false); setShowWithdrawFlow(false)}} className="w-full bg-[#1c1c1e] py-4 rounded-2xl font-bold border border-white/10">Try Again Later</button>
+                  </div>
+                </div>
+              `}
+            </div>
+          `}
+
+          {/* SEE MORE OVERLAY */}
+          ${showSeeMore && html`
+            <div className="fixed inset-0 z-[90] bg-black/95 flex flex-col max-w-md mx-auto animate-in slide-in-from-bottom duration-300">
+               <div className="p-8 flex justify-between items-center">
+                 <h2 className="text-2xl font-bold">Services</h2>
+                 <button onClick=${() => setShowSeeMore(false)}><${X}/></button>
+               </div>
+               <div className="grid grid-cols-3 gap-6 p-8">
+                  ${[ {i: html`<${ArrowUpRight}/>`, l: 'Send'}, {i: html`<${ArrowDownLeft}/>`, l: 'Receive'}, {i: html`<${Plus}/>`, l: 'Fiat'}, {i: html`<${RefreshCw}/>`, l: 'Swap'}, {i: html`<${ShieldCheck}/>`, l: 'Vault'}, {i: html`<${Info}/>`, l: 'Support'} ].map((item, idx) => html`
+                    <div key=${idx} className="flex flex-col items-center gap-3">
+                      <div className="w-16 h-16 bg-[#1c1c1e] rounded-full flex items-center justify-center text-[#268aff]">${item.i}</div>
+                      <span className="text-xs font-bold text-gray-400">${item.l}</span>
+                    </div>
+                  `)}
+               </div>
+            </div>
+          `}
+        </div>
+      `;
+    };
+
+    // --- RENDER ---
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(html`<${App} />`);
+  </script>
+</body>
+</html>
