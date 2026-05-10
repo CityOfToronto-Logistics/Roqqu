@@ -4,288 +4,218 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Roqqu</title>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/htm@3.1.1/dist/htm.umd.js"></script>
-  <script src="https://unpkg.com/lucide-react@0.263.1/dist/lucide-react.umd.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
-    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-    .animate-marquee { display: flex; width: 200%; animation: marquee 30s linear infinite; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    body { font-family: 'Inter', system-ui, sans-serif; }
     .hide-scrollbar::-webkit-scrollbar { display: none; }
-    body { background-color: #050505; color: white; font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }
-    .action-circle { width: 68px; height: 68px; background: #1c1c1e; border-radius: 9999px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.08); }
+    .action-btn {
+      width: 68px;
+      height: 68px;
+      background-color: #1c1c1e;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .marquee {
+      animation: marquee 25s linear infinite;
+    }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
   </style>
 </head>
-<body>
-  <div id="root"></div>
+<body class="bg-[#050505] text-white min-h-screen pb-20">
+  
+  <!-- HEADER -->
+  <header class="fixed top-0 left-0 right-0 max-w-md mx-auto bg-[#050505] z-50 px-5 py-4 flex items-center justify-between border-b border-white/10">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 bg-[#1c1c1e] rounded-2xl flex items-center justify-center relative">
+        <i class="fa-solid fa-bars text-lg"></i>
+        <div class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-[#050505]"></div>
+      </div>
+      <div class="bg-[#1c1c1e] px-5 py-2 rounded-3xl text-sm font-medium flex items-center gap-1">
+        Crypto <i class="fa-solid fa-chevron-down text-xs"></i>
+      </div>
+    </div>
+    <div class="flex items-center gap-5">
+      <i class="fa-solid fa-magnifying-glass text-xl"></i>
+      <i class="fa-solid fa-headphones text-xl"></i>
+    </div>
+  </header>
+
+  <main class="max-w-md mx-auto pt-20 px-4">
+
+    <!-- BALANCE -->
+    <div class="text-center pt-6">
+      <div class="flex justify-center items-center gap-3">
+        <span id="balance" class="text-4xl font-bold tracking-wider">₦354,450.00</span>
+        <button onclick="toggleBalance()" class="text-gray-400">
+          <i id="eye" class="fa-solid fa-eye text-2xl"></i>
+        </button>
+      </div>
+      <div class="inline-flex items-center gap-2 bg-[#1c1c1e] px-5 py-1.5 rounded-3xl mt-3">
+        <div class="w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center text-xs">🇳🇬</div>
+        <span class="text-sm font-medium">NGN Wallet</span>
+      </div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="bg-[#121214] rounded-3xl p-6 mt-8">
+      <div class="grid grid-cols-4 gap-6">
+        <div onclick="alert('Deposit clicked')" class="flex flex-col items-center gap-2 cursor-pointer active:scale-95">
+          <div class="action-btn"><i class="fa-solid fa-arrow-down text-[#268aff] text-3xl"></i></div>
+          <span class="text-xs font-medium text-gray-400">Deposit</span>
+        </div>
+        <div onclick="showWithdraw()" class="flex flex-col items-center gap-2 cursor-pointer active:scale-95">
+          <div class="action-btn"><i class="fa-solid fa-arrow-up text-[#268aff] text-3xl"></i></div>
+          <span class="text-xs font-medium text-gray-400">Withdraw</span>
+        </div>
+        <div class="flex flex-col items-center gap-2 cursor-pointer active:scale-95">
+          <div class="action-btn"><i class="fa-solid fa-rotate text-[#268aff] text-3xl"></i></div>
+          <span class="text-xs font-medium text-gray-400">Buy</span>
+        </div>
+        <div class="flex flex-col items-center gap-2 cursor-pointer active:scale-95">
+          <div class="action-btn"><i class="fa-solid fa-rotate text-[#268aff] text-3xl"></i></div>
+          <span class="text-xs font-medium text-gray-400">Sell</span>
+        </div>
+      </div>
+      <div class="text-center mt-6">
+        <button onclick="showServices()" class="text-[#268aff] font-semibold text-sm">See more</button>
+      </div>
+    </div>
+
+    <!-- FUTURES -->
+    <div class="bg-[#121214] rounded-3xl p-6 mt-6">
+      <div class="flex gap-4">
+        <div class="flex-1">
+          <h2 class="text-2xl font-bold leading-tight">Futures trading,<br>for the rest of us</h2>
+          <p class="text-gray-400 mt-3 text-sm">Take positions on your favorite coins without the noise</p>
+          <button class="mt-6 bg-white text-black px-6 py-3 rounded-2xl font-semibold">Start trading</button>
+        </div>
+        <img src="https://picsum.photos/id/1015/280/220" class="w-32 h-32 object-cover rounded-2xl" alt="">
+      </div>
+    </div>
+
+    <!-- QUIZ -->
+    <div class="bg-[#121214] rounded-3xl p-6 mt-6 flex justify-between items-center">
+      <div>
+        <h3 class="font-semibold text-lg">Take the Quiz</h3>
+        <p class="text-gray-400 text-sm mt-1">Learn how to spot scams &amp; protect your funds!</p>
+      </div>
+      <button class="bg-[#268aff] px-6 py-3 rounded-2xl font-semibold text-sm">Take Quiz</button>
+    </div>
+
+    <!-- FEATURED COINS -->
+    <div class="mt-8">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold text-xl">Our 128+ Featured Coins</h3>
+        <span class="text-[#268aff] text-sm">See all</span>
+      </div>
+      <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-4">
+        <div class="min-w-[200px] bg-[#1c1c1e] rounded-3xl p-5">
+          <div class="flex items-center gap-3">
+            <span class="text-4xl">₿</span>
+            <div>
+              <p class="font-bold">BTC</p>
+              <p class="text-xs text-gray-500">Bitcoin</p>
+            </div>
+          </div>
+          <div class="mt-8 h-20 bg-gradient-to-r from-orange-500/20 to-transparent rounded-2xl"></div>
+          <div class="mt-4">
+            <p class="text-2xl font-bold">₦111,150,490</p>
+            <p class="text-emerald-500 font-medium">+0.57%</p>
+          </div>
+        </div>
+        <!-- Add more cards as needed -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a0a0c] border-t border-white/10 py-3 z-50">
+    <div class="flex justify-around text-xs">
+      <div class="flex flex-col items-center text-white">
+        <i class="fa-solid fa-house text-xl"></i>
+        <span class="mt-1">Home</span>
+      </div>
+      <div onclick="alert('Wallet clicked')" class="flex flex-col items-center text-gray-500">
+        <i class="fa-solid fa-wallet text-xl"></i>
+        <span class="mt-1">Wallet</span>
+      </div>
+      <div onclick="alert('Markets clicked')" class="flex flex-col items-center text-gray-500">
+        <i class="fa-solid fa-chart-line text-xl"></i>
+        <span class="mt-1">Markets</span>
+      </div>
+      <div onclick="alert('Cards clicked')" class="flex flex-col items-center text-gray-500">
+        <i class="fa-solid fa-credit-card text-xl"></i>
+        <span class="mt-1">Cards</span>
+      </div>
+      <div onclick="alert('History clicked')" class="flex flex-col items-center text-gray-500">
+        <i class="fa-solid fa-clock text-xl"></i>
+        <span class="mt-1">History</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- WITHDRAW MODAL -->
+  <div id="withdrawModal" class="hidden fixed inset-0 bg-black/95 z-[100] flex flex-col max-w-md mx-auto">
+    <div class="p-5 flex items-center justify-between border-b border-white/10">
+      <button onclick="hideWithdraw()" class="text-2xl">×</button>
+      <h2 class="font-bold text-lg">Withdraw NGN</h2>
+      <div></div>
+    </div>
+    <div class="p-6 flex-1">
+      <p class="text-xs text-gray-500">AMOUNT</p>
+      <input type="number" id="withdrawAmount" class="bg-transparent text-6xl font-bold outline-none w-full mt-2" placeholder="0.00">
+      <p class="text-gray-500 mt-8">Balance: ₦354,450.00</p>
+      
+      <button onclick="processWithdraw()" class="mt-12 w-full bg-[#268aff] py-5 rounded-3xl font-bold text-lg">
+        Proceed Withdrawal
+      </button>
+    </div>
+  </div>
 
   <script>
-    const { createElement, useState } = React;
-    const html = htm.bind(createElement);
+    let balanceVisible = true;
     
-    const { 
-      Home, Wallet, LayoutGrid, CreditCard, Clock, Search, Headphones, ChevronDown, 
-      Eye, EyeOff, ArrowUpRight, ArrowDownLeft, RefreshCw, Menu, X, SlidersHorizontal, 
-      AlertCircle, Loader2, ChevronRight, Banknote, Timer, TrendingUp 
-    } = LucideReact;
+    function toggleBalance() {
+      balanceVisible = !balanceVisible;
+      const balanceEl = document.getElementById('balance');
+      const eye = document.getElementById('eye');
+      if (balanceVisible) {
+        balanceEl.textContent = '₦354,450.00';
+        eye.classList.replace('fa-eye-slash', 'fa-eye');
+      } else {
+        balanceEl.textContent = '***********';
+        eye.classList.replace('fa-eye', 'fa-eye-slash');
+      }
+    }
 
-    // Mock Data
-    const cryptos = [
-      { id: 1, name: 'Bitcoin', symbol: 'BTC', price: '111,150,490', change: '+0.57%', up: true, icon: '₿', color: 'text-orange-500' },
-      { id: 2, name: 'Ethereum', symbol: 'ETH', price: '4,200,500', change: '+1.2%', up: true, icon: 'Ξ', color: 'text-purple-400' },
-      { id: 3, name: 'Solana', symbol: 'SOL', price: '210,400', change: '-2.1%', up: false, icon: '◎', color: 'text-emerald-400' },
-      { id: 4, name: 'Cardano', symbol: 'ADA', price: '650.20', change: '+0.4%', up: true, icon: '₳', color: 'text-blue-600' },
-      { id: 5, name: 'Dogecoin', symbol: 'DOGE', price: '215.40', change: '+4.2%', up: true, icon: 'Ð', color: 'text-yellow-600' },
-      { id: 6, name: 'PAX Gold', symbol: 'PAXG', price: '6,474,586.25', change: '+0.07%', up: true, icon: '●', color: 'text-yellow-500' },
-      { id: 7, name: 'Paris-Saint Germain', symbol: 'PSG', price: '1,634.875', change: '+28.95%', up: true, icon: '⚽', color: 'text-blue-500' },
-      { id: 8, name: 'Uniswap', symbol: 'UNI', price: '5,509.625', change: '+9.42%', up: true, icon: '🦄', color: 'text-pink-500' },
-      { id: 9, name: 'Sui', symbol: 'SUI', price: '1,547.425', change: '+6.08%', up: true, icon: '💧', color: 'text-cyan-400' },
-      { id: 10, name: 'Polkadot', symbol: 'DOT', price: '10,200', change: '-1.5%', up: false, icon: '●', color: 'text-pink-600' },
-    ];
+    function showWithdraw() {
+      document.getElementById('withdrawModal').classList.remove('hidden');
+    }
 
-    const stocks = [
-      { id: 1, name: 'Apple Inc.', symbol: 'AAPL', price: '$189.50', change: '+1.2%', up: true },
-      { id: 2, name: 'Tesla Inc.', symbol: 'TSLA', price: '$175.20', change: '-3.4%', up: false },
-      { id: 3, name: 'Microsoft Corp.', symbol: 'MSFT', price: '$410.00', change: '+0.8%', up: true },
-      { id: 4, name: 'Amazon.com', symbol: 'AMZN', price: '$185.40', change: '+1.5%', up: true },
-      { id: 5, name: 'Alphabet Inc.', symbol: 'GOOGL', price: '$168.30', change: '-0.2%', up: false },
-      { id: 6, name: 'Meta Platforms', symbol: 'META', price: '$480.10', change: '+2.1%', up: true },
-      { id: 7, name: 'NVIDIA Corp.', symbol: 'NVDA', price: '$890.50', change: '+4.5%', up: true },
-      { id: 8, name: 'Netflix Inc.', symbol: 'NFLX', price: '$610.20', change: '-1.0%', up: false },
-      { id: 9, name: 'Alibaba Group', symbol: 'BABA', price: '$78.40', change: '-0.5%', up: false },
-      { id: 10, name: 'AMD', symbol: 'AMD', price: '$155.80', change: '+1.9%', up: true },
-    ];
+    function hideWithdraw() {
+      document.getElementById('withdrawModal').classList.add('hidden');
+    }
 
-    const historyData = [
-      { id: 1, type: 'BTC Received', sub: 'Pending confirmation', amount: '340.00', date: 'Sunday, May 10, 2026', status: 'pending', color: 'text-emerald-400' },
-      { id: 2, type: 'BTC Sent', sub: 'External Wallet', amount: '150.00', date: 'Friday, May 8, 2026', status: 'completed', color: 'text-rose-500' },
-    ];
+    function processWithdraw() {
+      hideWithdraw();
+      alert("Withdrawal simulation: Currently under maintenance.");
+    }
 
-    // Components
-    const NavItem = ({ icon, label, active, onClick }) => html`
-      <button onClick=${onClick} className=${`flex flex-col items-center gap-1 ${active ? 'text-white' : 'text-gray-500'}`}>
-        ${icon}
-        <span className="text-[10px] font-bold">${label}</span>
-      </button>
-    `;
+    function showServices() {
+      alert("Services overlay would appear here.\n\nSend • Receive • Swap • etc.");
+    }
 
-    const HomeAction = ({ icon, label, onClick }) => html`
-      <div onClick=${onClick} className="flex flex-col items-center gap-2 cursor-pointer active:scale-95 transition-transform">
-        <div className="action-circle">${icon}</div>
-        <span className="text-xs font-medium text-gray-400">${label}</span>
-      </div>
-    `;
-
-    const HomeView = ({ balanceValue, showBalance, setShowBalance, onWithdraw, onSeeMore }) => html`
-      <div className="space-y-8 px-4 pb-8 pt-6">
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <span className="text-4xl font-black tracking-widest ${showBalance ? '' : 'text-gray-700'}">
-              ${showBalance ? `₦${balanceValue}` : '***********'}
-            </span>
-            <button onClick=${() => setShowBalance(!showBalance)} className="text-gray-400">
-              ${showBalance ? html`<${EyeOff} size=${24} />` : html`<${Eye} size=${24} />`}
-            </button>
-          </div>
-          <div className="inline-flex items-center gap-2 bg-[#1c1c1e] px-5 py-1.5 rounded-3xl border border-white/5 mx-auto">
-            <div className="w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center text-xs">🇳🇬</div>
-            <span className="font-medium text-sm">NGN</span>
-            <${ChevronDown} size=${16} />
-          </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div className="bg-[#121214] rounded-3xl p-6">
-          <div className="grid grid-cols-4 gap-6">
-            <${HomeAction} icon=${html`<${ArrowDownLeft} size=${28} className="text-[#268aff]" />`} label="Deposit" />
-            <${HomeAction} icon=${html`<${ArrowUpRight} size=${28} className="text-[#268aff]" />`} label="Withdraw" onClick=${onWithdraw} />
-            <${HomeAction} icon=${html`<${RefreshCw} size=${28} className="text-[#268aff]" />`} label="Buy" />
-            <${HomeAction} icon=${html`<${RefreshCw} size=${28} className="text-[#268aff]" />`} label="Sell" />
-          </div>
-          <div class="text-center mt-6">
-            <button onClick=${onSeeMore} className="text-[#268aff] font-semibold">See more</button>
-          </div>
-        </div>
-
-        <!-- Futures -->
-        <div className="bg-[#121214] rounded-3xl p-6">
-          <div class="flex gap-6">
-            <div class="flex-1">
-              <h3 class="text-2xl font-bold leading-tight">Futures trading,<br>for the rest of us</h3>
-              <p class="text-gray-400 mt-2 text-sm">Take positions on your favorite coins without the noise</p>
-              <button class="mt-6 bg-white text-black px-6 py-3 rounded-2xl font-semibold">Start trading</button>
-            </div>
-            <div class="w-32 h-32 flex-shrink-0">
-              <img src="https://picsum.photos/id/1015/300/300" class="rounded-2xl" alt=""/>
-            </div>
-          </div>
-        </div>
-
-        <!-- Quiz -->
-        <div className="bg-[#121214] rounded-3xl p-6 flex items-center justify-between">
-          <div>
-            <h4 class="font-semibold text-lg">Take the Quiz</h4>
-            <p class="text-gray-400 text-sm">Learn how to spot scams & protect your funds!</p>
-          </div>
-          <button class="bg-[#268aff] px-6 py-3 rounded-2xl font-semibold">Take the Quiz</button>
-        </div>
-
-        <!-- Featured Coins -->
-        <div>
-          <div class="flex justify-between mb-4 px-1">
-            <h3 class="font-bold text-xl">Our 128+ Featured Coins</h3>
-            <span class="text-[#268aff] text-sm">See all</span>
-          </div>
-          <div class="flex gap-4 overflow-x-auto hide-scrollbar">
-            ${cryptos.slice(0,4).map(coin => html`
-              <div class="min-w-[200px] bg-[#1c1c1e] rounded-3xl p-5">
-                <div class="flex items-center gap-3">
-                  <div class=${`text-4xl ${coin.color}`}>${coin.icon}</div>
-                  <div>
-                    <p class="font-bold">${coin.symbol}</p>
-                    <p class="text-xs text-gray-500">${coin.name}</p>
-                  </div>
-                </div>
-                <div class="mt-8 h-20 bg-gradient-to-r from-transparent via-white/10 to-transparent rounded-2xl"></div>
-                <div class="mt-4">
-                  <p class="text-2xl font-bold">₦${coin.price}</p>
-                  <p class=${`font-medium ${coin.up ? 'text-emerald-500' : 'text-rose-500'}`}>${coin.change}</p>
-                </div>
-              </div>
-            `)}
-          </div>
-        </div>
-      </div>
-    `;
-
-    const WalletView = () => html`<div class="p-6 text-center text-2xl text-gray-500 pt-20">Wallet View Coming Soon</div>`;
-    const MarketView = () => html`<div class="p-6 text-center text-2xl text-gray-500 pt-20">Markets View Coming Soon</div>`;
-    const CardView = () => html`<div class="p-6 text-center text-2xl text-gray-500 pt-20">Cards View Coming Soon</div>`;
-    const HistoryView = () => html`<div class="p-6 text-center text-2xl text-gray-500 pt-20">History View Coming Soon</div>`;
-
-    // Main App
-    const App = () => {
-      const [activeTab, setActiveTab] = useState('home');
-      const [showBalance, setShowBalance] = useState(false);
-      const [showWithdrawFlow, setShowWithdrawFlow] = useState(false);
-      const [showSeeMore, setShowSeeMore] = useState(false);
-      const [withdrawAmount, setWithdrawAmount] = useState('');
-      const [isWithdrawing, setIsWithdrawing] = useState(false);
-      const [withdrawError, setWithdrawError] = useState(false);
-      const balanceValue = "354,450.00";
-
-      const handleWithdraw = () => {
-        if (!withdrawAmount) return;
-        setIsWithdrawing(true);
-        setTimeout(() => {
-          setIsWithdrawing(false);
-          setWithdrawError(true);
-        }, 1500);
-      };
-
-      return html`
-        <div className="bg-[#050505] min-h-screen text-white overflow-hidden max-w-md mx-auto">
-          <!-- Header -->
-          <div className="fixed top-0 left-0 right-0 max-w-md mx-auto bg-[#050505] z-50 px-5 py-4 flex justify-between items-center border-b border-white/10">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 bg-[#1c1c1e] rounded-xl flex items-center justify-center relative">
-                <${Menu} size=${20} />
-                <div class="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 rounded-full"></div>
-              </div>
-              <div class="bg-[#1c1c1e] px-4 py-2 rounded-3xl text-sm font-medium flex items-center gap-1">
-                Crypto <${ChevronDown} size=${14}/>
-              </div>
-            </div>
-            <div class="flex gap-5">
-              <${Search} size=${22}/>
-              <${Headphones} size=${22}/>
-            </div>
-          </div>
-
-          <!-- Content -->
-          <main class="pt-20 pb-24 min-h-screen overflow-y-auto hide-scrollbar">
-            ${activeTab === 'home' ? html`<${HomeView} 
-              balanceValue=${balanceValue} 
-              showBalance=${showBalance} 
-              setShowBalance=${setShowBalance}
-              onWithdraw=${() => setShowWithdrawFlow(true)}
-              onSeeMore=${() => setShowSeeMore(true)}
-            />` : ''}
-            ${activeTab === 'wallet' && html`<${WalletView}/>`}
-            ${activeTab === 'market' && html`<${MarketView}/>`}
-            ${activeTab === 'card' && html`<${CardView}/>`}
-            ${activeTab === 'history' && html`<${HistoryView}/>`}
-          </main>
-
-          <!-- Bottom Nav -->
-          <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a0a0c] border-t border-white/10 z-50">
-            <div class="flex justify-around py-3">
-              <${NavItem} icon=${html`<${Home} size=${24}/>`} label="Home" active=${activeTab==='home'} onClick=${() => setActiveTab('home')} />
-              <${NavItem} icon=${html`<${Wallet} size=${24}/>`} label="Wallet" active=${activeTab==='wallet'} onClick=${() => setActiveTab('wallet')} />
-              <${NavItem} icon=${html`<${LayoutGrid} size=${24}/>`} label="Markets" active=${activeTab==='market'} onClick=${() => setActiveTab('market')} />
-              <${NavItem} icon=${html`<${CreditCard} size=${24}/>`} label="Cards" active=${activeTab==='card'} onClick=${() => setActiveTab('card')} />
-              <${NavItem} icon=${html`<${Clock} size=${24}/>`} label="History" active=${activeTab==='history'} onClick=${() => setActiveTab('history')} />
-            </div>
-          </nav>
-
-          <!-- Withdraw Modal -->
-          ${showWithdrawFlow && html`
-            <div class="fixed inset-0 bg-black/95 z-[100] flex flex-col max-w-md mx-auto">
-              <div class="p-5 flex items-center justify-between border-b border-white/10">
-                <button onClick=${() => setShowWithdrawFlow(false)} class="p-2"><${X} size=${24}/></button>
-                <h2 class="font-bold text-lg">Withdraw NGN</h2>
-                <div></div>
-              </div>
-              <div class="p-6 flex-1 flex flex-col">
-                <div>
-                  <p class="text-xs text-gray-500 font-medium">AMOUNT</p>
-                  <div class="flex items-end border-b border-white/20 py-4">
-                    <input type="number" value=${withdrawAmount} onChange=${e => setWithdrawAmount(e.target.value)} 
-                           class="bg-transparent text-6xl font-bold outline-none flex-1" placeholder="0.00"/>
-                    <span class="text-3xl text-gray-500">NGN</span>
-                  </div>
-                </div>
-                <button onClick=${handleWithdraw} disabled=${!withdrawAmount || isWithdrawing}
-                  class="mt-auto bg-[#268aff] py-5 rounded-3xl font-bold text-lg">
-                  ${isWithdrawing ? 'Processing...' : 'Proceed Withdrawal'}
-                </button>
-              </div>
-            </div>
-          `}
-
-          ${withdrawError && html`
-            <div class="fixed inset-0 bg-black/95 z-[110] flex items-center justify-center p-6 max-w-md mx-auto">
-              <div class="bg-[#121214] rounded-3xl p-8 text-center">
-                <div class="text-red-500 mx-auto w-16 h-16 flex items-center justify-center text-5xl">⚠️</div>
-                <h3 class="text-xl font-bold mt-6">Maintenance Notice</h3>
-                <p class="text-gray-400 mt-3">Withdrawal is currently unavailable. Please try again later.</p>
-                <button onClick=${() => {setWithdrawError(false); setShowWithdrawFlow(false);}} 
-                  class="mt-8 w-full bg-white text-black py-4 rounded-2xl font-bold">OK</button>
-              </div>
-            </div>
-          `}
-
-          ${showSeeMore && html`
-            <div class="fixed inset-0 bg-black/95 z-[100] flex flex-col max-w-md mx-auto">
-              <div class="p-6 flex justify-between">
-                <h2 class="text-2xl font-bold">Services</h2>
-                <button onClick=${() => setShowSeeMore(false)}><${X} size=${28}/></button>
-              </div>
-              <div class="p-6 grid grid-cols-3 gap-6 text-center">
-                <div class="flex flex-col items-center"><div class="w-16 h-16 bg-[#1c1c1e] rounded-2xl flex items-center justify-center text-3xl">↑</div><p class="mt-2 text-sm">Send</p></div>
-                <div class="flex flex-col items-center"><div class="w-16 h-16 bg-[#1c1c1e] rounded-2xl flex items-center justify-center text-3xl">↓</div><p class="mt-2 text-sm">Receive</p></div>
-                <div class="flex flex-col items-center"><div class="w-16 h-16 bg-[#1c1c1e] rounded-2xl flex items-center justify-center text-3xl">🔄</div><p class="mt-2 text-sm">Swap</p></div>
-              </div>
-            </div>
-          `}
-        </div>
-      `;
-    };
-
-    // Render App
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(React.createElement(App));
+    // Tailwind script already loaded via CDN
   </script>
 </body>
 </html>
